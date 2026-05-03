@@ -17,9 +17,6 @@ exporters:
       insecure: true
 
 service:
-  telemetry:
-    logs:
-      level: warn
   pipelines:
     traces:
       receivers: [otlp]
@@ -30,3 +27,7 @@ service:
     metrics:
       receivers: [otlp]
       exporters: [otlp/openobserve]
+
+  telemetry:
+    logs:
+      level: warn
