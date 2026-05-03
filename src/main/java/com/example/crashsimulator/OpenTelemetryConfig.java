@@ -1,8 +1,8 @@
 package com.example.crashsimulator;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.exporter.otlp.grpc.OtlpGrpcLogRecordExporter;
-import io.opentelemetry.exporter.otlp.grpc.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
@@ -33,7 +33,7 @@ public class OpenTelemetryConfig {
                 .build();
 
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
-                .addLogRecordProcessor(BatchLogRecordProcessor.create(logExporter))
+                .addLogRecordProcessor(BatchLogRecordProcessor.builder(logExporter).build())
                 .build();
 
         return OpenTelemetrySdk.builder()
