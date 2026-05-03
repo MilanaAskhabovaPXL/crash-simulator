@@ -6,7 +6,8 @@
       "Read(//c/ProgramData/chocolatey/bin/**)",
       "Read(//c/Users/milan/.m2/**)",
       "Read(//c/Users/milan/**)",
-      "Read(//c/tools/**)"
+      "Read(//c/tools/**)",
+      "Bash(docker compose *)"
     ]
   }
 }
