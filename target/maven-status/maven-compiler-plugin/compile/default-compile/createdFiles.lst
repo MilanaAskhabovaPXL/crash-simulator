@@ -1,5 +1,4 @@
-com/example/crashsimulator/CrashSimulatorApplication.class
-com/example/crashsimulator/BatchJobController.class
-com/example/crashsimulator/TransOazisWebserviceGeneratieJob.class
-com/example/crashsimulator/TransLayoutConfig.class
-com/example/crashsimulator/SimulationController.class
+com\example\crashsimulator\SimulatorCrashSimulatorApplication.class
+com\example\crashsimulator\SimulatorTransOazisWebserviceGeneratieJob.class
+com\example\crashsimulator\SimulatorTransLayoutConfig.class
+com\example\crashsimulator\SimulatorBatchJobController.class
