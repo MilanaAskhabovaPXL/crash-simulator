@@ -12,9 +12,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/simulate")
-public class SimulationController {
+public class SimulatorSimulationController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimulationController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorSimulationController.class);
 
     /**
      * SCENARIO 1: Expliciet Exception (Crash-loop)

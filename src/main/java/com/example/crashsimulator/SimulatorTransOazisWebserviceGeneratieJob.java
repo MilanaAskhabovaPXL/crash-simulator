@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransOazisWebserviceGeneratieJob {
+public class SimulatorTransOazisWebserviceGeneratieJob {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransOazisWebserviceGeneratieJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorTransOazisWebserviceGeneratieJob.class);
 
     /**
      * SCENARIO 1: Normale uitvoering (succes)
@@ -71,7 +71,7 @@ public class TransOazisWebserviceGeneratieJob {
     }
 
     private void generateXMLMessageWithError() {
-        TransLayoutConfig config = null;  // ← Intentional null (simulates transLayoutConfig == null)
+        SimulatorTransLayoutConfig config = null;  // ← Intentional null (simulates transLayoutConfig == null)
         // Throws NullPointerException — equivalent to TransWriterHelper.getXMLData()
         String value = config.getLayout().toString();
     }

@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/batch")
-public class BatchJobController {
+public class SimulatorBatchJobController {
 
     @Autowired
-    private TransOazisWebserviceGeneratieJob batchJob;
+    private SimulatorTransOazisWebserviceGeneratieJob batchJob;
 
     /**
      * SCENARIO 1: Normale uitvoering
