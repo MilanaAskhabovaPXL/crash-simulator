@@ -16,6 +16,10 @@ public class SimulationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulationController.class);
 
+    /**
+     * SCENARIO 1: Expliciet Exception (Crash-loop)
+     * NullPointerException wordt N keer geworpen en gelogd.
+     */
     @PostMapping("/crash")
     public ResponseEntity<String> simulateCrash(@RequestParam(defaultValue = "1") int count) {
         for (int i = 0; i < count; i++) {
@@ -27,5 +31,28 @@ public class SimulationController {
             }
         }
         return ResponseEntity.ok("Crash simulation complete. Check logs.");
+    }
+
+    /**
+     * SCENARIO 2: Trage response / latency spike
+     * Simuleert een hangende of trage externe call (bijv. database/API timeout).
+     * De thread slaapt 'delayMs' milliseconden en logt een waarschuwing.
+     *
+     * Gebruik:
+     *   curl -X POST http://localhost:8080/simulate/slow
+     *   curl -X POST "http://localhost:8080/simulate/slow?delayMs=5000"
+     */
+    @PostMapping("/slow")
+    public ResponseEntity<String> simulateSlow(@RequestParam(defaultValue = "3000") long delayMs) {
+        LOGGER.warn("Slow call started: simulating delay of {} ms", delayMs);
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Slow call interrupted after {} ms", delayMs, e);
+            return ResponseEntity.status(500).body("Slow simulation interrupted.");
+        }
+        LOGGER.warn("Slow call finished after {} ms", delayMs);
+        return ResponseEntity.ok("Slow simulation complete (" + delayMs + " ms delay). Check logs.");
     }
 }
