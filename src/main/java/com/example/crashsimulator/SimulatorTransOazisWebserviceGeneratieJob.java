@@ -9,10 +9,6 @@ public class SimulatorTransOazisWebserviceGeneratieJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorTransOazisWebserviceGeneratieJob.class);
 
-    /**
-     * SCENARIO 1: Normale uitvoering (succes)
-     * Simuleert verwerking van 45 sessies zonder fouten.
-     */
     public void executeSuccess() {
         LOGGER.info("TransOazisWebserviceGeneratieJob started");
 
@@ -25,10 +21,6 @@ public class SimulatorTransOazisWebserviceGeneratieJob {
         LOGGER.info("Total sessions processed: 45");
     }
 
-    /**
-     * SCENARIO 2: Crash-loop (NullPointerException)
-     * transLayoutConfig is null -> NullPointerException per sessie.
-     */
     public void executeCrashLoop(int iterations) {
         LOGGER.info("TransOazisWebserviceGeneratieJob started");
 
@@ -44,21 +36,13 @@ public class SimulatorTransOazisWebserviceGeneratieJob {
         LOGGER.error("TransOazisWebserviceGeneratieJob failed: " + iterations + " errors occurred");
     }
 
-    /**
-     * SCENARIO 3: Silent Failure (0 records verwerkt)
-     * Database-query retourneert 0 sessies maar de job logt succes.
-     */
     public void executeSilentFailure() {
         LOGGER.info("TransOazisWebserviceGeneratieJob started");
         LOGGER.info("Checking for sessions to process...");
-
-        int sessiesGevonden = 0;
-        LOGGER.info("Found " + sessiesGevonden + " sessions in database");
-
+        LOGGER.info("Found 0 sessions in database");
         LOGGER.info("Processing sessions...");
         LOGGER.info("Sending XML messages to Mirth...");
-
-        // Geen loop: 0 sessies -> geen XML gegenereerd, maar job meldt succes
+        // simulates silent failure: job reports success despite processing nothing
         LOGGER.info("TransOazisWebserviceGeneratieJob completed successfully");
         LOGGER.info("Total sessions processed: 0");
     }

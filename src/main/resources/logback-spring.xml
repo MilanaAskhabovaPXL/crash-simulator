@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Console appender (wat je nu ziet) -->
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- OpenTelemetry Logback Appender (stuurt naar Collector) -->
-    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.OpenTelemetryAppender">
-        <immediateFlush>true</immediateFlush>
-    </appender>
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender"/>
 
-    <!-- Root logger: alles naar beide appenders -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="OTEL"/>
     </root>
 
-    <!-- Logger level voor crash-simulator -->
-    <logger name="com.example.crashsimulator" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="OTEL"/>
-    </logger>
 </configuration>

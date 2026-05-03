@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where mvn *)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/ProgramData/chocolatey/bin/**)",
+      "Read(//c/Users/milan/.m2/**)",
+      "Read(//c/Users/milan/**)",
+      "Read(//c/tools/**)"
+    ]
+  }
+}

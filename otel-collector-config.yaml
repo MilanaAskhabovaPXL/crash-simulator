@@ -10,7 +10,7 @@ exporters:
   otlp/openobserve:
     endpoint: openobserve:5081        # Docker service name; gebruik localhost:5081 bij lokale setup
     headers:
-      Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpwdFp2TW02bHQwcVk4bXJs"
+      Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206YWRtaW4xMjM="
       organization: default
       stream-name: default
     tls:
@@ -18,13 +18,7 @@ exporters:
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      exporters: [otlp/openobserve]
     logs:
-      receivers: [otlp]
-      exporters: [otlp/openobserve]
-    metrics:
       receivers: [otlp]
       exporters: [otlp/openobserve]
 
