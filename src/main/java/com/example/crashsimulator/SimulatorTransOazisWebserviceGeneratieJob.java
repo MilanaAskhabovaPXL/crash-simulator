@@ -1,5 +1,9 @@
 package com.example.crashsimulator;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -9,61 +13,109 @@ public class SimulatorTransOazisWebserviceGeneratieJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorTransOazisWebserviceGeneratieJob.class);
 
+    private final Tracer tracer;
+
+    public SimulatorTransOazisWebserviceGeneratieJob(OpenTelemetry openTelemetry) {
+        this.tracer = openTelemetry.getTracer("crash-simulator");
+    }
+
     /**
-     * SCENARIO 1: Normale uitvoering (succes)
-     * Simuleert verwerking van 45 sessies zonder fouten.
+     * SCENARIO 1: Normale uitvoering — 45 sessies zonder fouten.
+     * curl -X POST http://localhost:8080/batch/run-success
      */
     public void executeSuccess() {
-        LOGGER.info("TransOazisWebserviceGeneratieJob started");
+        Span rootSpan = tracer.spanBuilder("TransOazisWebserviceGeneratieJob.executeSuccess")
+                .setAttribute("scenario", "success")
+                .startSpan();
 
-        for (int i = 1; i <= 45; i++) {
-            LOGGER.info("Processing session " + i + " - Generating XML message");
-            generateXMLMessage("SESSION_" + i);
+        try (var scope = rootSpan.makeCurrent()) {
+            LOGGER.info("TransOazisWebserviceGeneratieJob started");
+
+            for (int i = 1; i <= 45; i++) {
+                Span sessionSpan = tracer.spanBuilder("ProcessSession")
+                        .setAttribute("sessionId", i)
+                        .startSpan();
+                try (var sessionScope = sessionSpan.makeCurrent()) {
+                    LOGGER.info("Processing session " + i + " - Generating XML message");
+                    generateXMLMessage("SESSION_" + i);
+                } finally {
+                    sessionSpan.end();
+                }
+            }
+
+            LOGGER.info("TransOazisWebserviceGeneratieJob completed successfully");
+            LOGGER.info("Total sessions processed: 45");
+            rootSpan.setStatus(StatusCode.OK);
+        } finally {
+            rootSpan.end();
         }
-
-        LOGGER.info("TransOazisWebserviceGeneratieJob completed successfully");
-        LOGGER.info("Total sessions processed: 45");
     }
 
     /**
-     * SCENARIO 2: Crash-loop (NullPointerException)
-     * transLayoutConfig is null → NullPointerException per sessie.
+     * SCENARIO 2: Crash-loop — NullPointerException per sessie.
+     * curl -X POST "http://localhost:8080/batch/run-crash?iterations=600"
      */
     public void executeCrashLoop(int iterations) {
-        LOGGER.info("TransOazisWebserviceGeneratieJob started");
+        Span rootSpan = tracer.spanBuilder("TransOazisWebserviceGeneratieJob.executeCrashLoop")
+                .setAttribute("scenario", "crash-loop")
+                .setAttribute("iterations", iterations)
+                .startSpan();
 
-        for (int i = 1; i <= iterations; i++) {
-            try {
-                LOGGER.info("Processing session " + i);
-                generateXMLMessageWithError();
-            } catch (NullPointerException e) {
-                LOGGER.error("NullPointerException in getXMLData(): transLayoutConfig is null for session " + i, e);
+        try (var scope = rootSpan.makeCurrent()) {
+            LOGGER.info("TransOazisWebserviceGeneratieJob started");
+
+            for (int i = 1; i <= iterations; i++) {
+                Span sessionSpan = tracer.spanBuilder("ProcessSession")
+                        .setAttribute("sessionId", i)
+                        .startSpan();
+
+                try (var sessionScope = sessionSpan.makeCurrent()) {
+                    LOGGER.info("Processing session " + i);
+                    generateXMLMessageWithError();
+                } catch (NullPointerException e) {
+                    sessionSpan.recordException(e);
+                    sessionSpan.setStatus(StatusCode.ERROR, "NullPointerException: transLayoutConfig is null");
+                    LOGGER.error("NullPointerException in getXMLData(): transLayoutConfig is null for session " + i, e);
+                } finally {
+                    sessionSpan.end();
+                }
             }
-        }
 
-        LOGGER.error("TransOazisWebserviceGeneratieJob failed: " + iterations + " errors occurred");
+            LOGGER.error("TransOazisWebserviceGeneratieJob failed: " + iterations + " errors occurred");
+            rootSpan.setStatus(StatusCode.ERROR, iterations + " sessions failed");
+        } finally {
+            rootSpan.end();
+        }
     }
 
     /**
-     * SCENARIO 3: Silent Failure (0 records verwerkt)
-     * Database-query retourneert 0 sessies maar de job logt succes.
+     * SCENARIO 3: Silent Failure — 0 records verwerkt maar job meldt succes.
+     * curl -X POST http://localhost:8080/batch/run-silent-failure
      */
     public void executeSilentFailure() {
-        LOGGER.info("TransOazisWebserviceGeneratieJob started");
-        LOGGER.info("Checking for sessions to process...");
+        Span rootSpan = tracer.spanBuilder("TransOazisWebserviceGeneratieJob.executeSilentFailure")
+                .setAttribute("scenario", "silent-failure")
+                .startSpan();
 
-        int sessiesGevonden = 0;
-        LOGGER.info("Found " + sessiesGevonden + " sessions in database");
+        try (var scope = rootSpan.makeCurrent()) {
+            LOGGER.info("TransOazisWebserviceGeneratieJob started");
+            LOGGER.info("Checking for sessions to process...");
 
-        LOGGER.info("Processing sessions...");
-        LOGGER.info("Sending XML messages to Mirth...");
+            int sessiesGevonden = 0;
+            rootSpan.setAttribute("sessionsFound", sessiesGevonden);
+            LOGGER.info("Found " + sessiesGevonden + " sessions in database");
 
-        // Geen loop: 0 sessies → geen XML gegenereerd, maar job meldt succes
-        LOGGER.info("TransOazisWebserviceGeneratieJob completed successfully");
-        LOGGER.info("Total sessions processed: 0");
+            LOGGER.info("Processing sessions...");
+            LOGGER.info("Sending XML messages to Mirth...");
+
+            // 0 sessies -> geen XML gegenereerd, maar job meldt succes (silent failure)
+            LOGGER.info("TransOazisWebserviceGeneratieJob completed successfully");
+            LOGGER.info("Total sessions processed: 0");
+            rootSpan.setStatus(StatusCode.OK);
+        } finally {
+            rootSpan.end();
+        }
     }
-
-    // ==================== Helper Methods ====================
 
     private void generateXMLMessage(String sessionId) {
         String xml = "<session id=\"" + sessionId + "\"/>";
@@ -71,8 +123,7 @@ public class SimulatorTransOazisWebserviceGeneratieJob {
     }
 
     private void generateXMLMessageWithError() {
-        SimulatorTransLayoutConfig config = null;  // ← Intentional null (simulates transLayoutConfig == null)
-        // Throws NullPointerException — equivalent to TransWriterHelper.getXMLData()
+        SimulatorTransLayoutConfig config = null;
         String value = config.getLayout().toString();
     }
 }

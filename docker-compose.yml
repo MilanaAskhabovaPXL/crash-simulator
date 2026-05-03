@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  openobserve:
+    image: openobserve/openobserve:latest
+    ports:
+      - "5080:5080"   # Web UI + HTTP ingestion
+      - "5081:5081"   # gRPC ingestion
+    environment:
+      ZO_ROOT_USER_EMAIL: root@example.com
+      ZO_ROOT_USER_PASSWORD: ptZvMm6lt0qY8mrl
+    volumes:
+      - openobserve_data:/data
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - "4317:4317"   # gRPC ontvanger (app -> collector)
+      - "4318:4318"   # HTTP ontvanger (alternatief)
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    depends_on:
+      - openobserve
+
+  spring-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - otel-collector
+
+volumes:
+  openobserve_data:

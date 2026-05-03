@@ -1,0 +1,32 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  otlp/openobserve:
+    endpoint: openobserve:5081        # Docker service name; gebruik localhost:5081 bij lokale setup
+    headers:
+      Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpwdFp2TW02bHQwcVk4bXJs"
+      organization: default
+      stream-name: default
+    tls:
+      insecure: true
+
+service:
+  telemetry:
+    logs:
+      level: warn
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/openobserve]
+    logs:
+      receivers: [otlp]
+      exporters: [otlp/openobserve]
+    metrics:
+      receivers: [otlp]
+      exporters: [otlp/openobserve]
