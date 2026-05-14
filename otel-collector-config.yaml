@@ -7,20 +7,16 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  otlp_grpc/openobserve:
-    endpoint: openobserve:5081
-    headers:
-      Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206ZlpqM0c2NFVtZ2tCMXZIZQ=="
-      organization: default
-      stream-name: default
+  otlp/tempo:
+    endpoint: tempo:4317
     tls:
       insecure: true
 
-  otlp_http/openobserve:
-    endpoint: http://openobserve:5080/api/default
-    headers:
-      Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206ZlpqM0c2NFVtZ2tCMXZIZQ=="
-      stream-name: default
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+
+  prometheus:
+    endpoint: 0.0.0.0:8889
 
 service:
   telemetry:
@@ -29,10 +25,10 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp_grpc/openobserve]
+      exporters: [otlp/tempo]
     metrics:
       receivers: [otlp]
-      exporters: [otlp_grpc/openobserve]
+      exporters: [prometheus]
     logs:
       receivers: [otlp]
-      exporters: [otlp_http/openobserve]
+      exporters: [otlphttp/loki]

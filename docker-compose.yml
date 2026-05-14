@@ -1,27 +1,75 @@
 version: '3.8'
 
 services:
-  openobserve:
-    image: openobserve/openobserve:latest
+  loki:
+    image: grafana/loki:latest
     ports:
-      - "5080:5080"
-      - "5081:5081"
-    environment:
-      ZO_ROOT_USER_EMAIL: admin@example.com
-      ZO_ROOT_USER_PASSWORD: admin123
+      - "3100:3100"
     volumes:
-      - openobserve_data:/data
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./tempo-config.yaml:/etc/tempo.yaml
+      - tempo_data:/var/tempo
+    command: -config.file=/etc/tempo.yaml
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     ports:
       - "4317:4317"
       - "4318:4318"
+      - "8889:8889"
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
     depends_on:
-      - openobserve
+      - loki
+      - tempo
+      - prometheus
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OTEL_SERVICE_NAME=crash-simulator
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_TRACES_EXPORTER=otlp
+    depends_on:
+      - otel-collector
 
 volumes:
-  openobserve_data:
+  loki_data:
+  tempo_data:
+  prometheus_data:
+  grafana_data:
