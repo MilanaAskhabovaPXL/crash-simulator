@@ -9,7 +9,7 @@ receivers:
 exporters:
   splunk_hec:
     token: "4a79468a-189f-43c0-adb5-78cbb3254990"
-    endpoint: "http://host.docker.internal:8088/services/collector"
+    endpoint: "http://splunk:8088/services/collector"
     source: "crash-simulator"
     sourcetype: "_json"
     index: "main"
