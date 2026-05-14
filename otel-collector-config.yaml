@@ -7,20 +7,12 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  otlp_grpc/openobserve:
-    endpoint: openobserve:5081
-    headers:
-      Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206ZlpqM0c2NFVtZ2tCMXZIZQ=="
-      organization: default
-      stream-name: default
-    tls:
-      insecure: true
-
-  otlp_http/openobserve:
-    endpoint: http://openobserve:5080/api/default
-    headers:
-      Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206ZlpqM0c2NFVtZ2tCMXZIZQ=="
-      stream-name: default
+  splunk_hec:
+    token: "4a79468a-189f-43c0-adb5-78cbb3254990"
+    endpoint: "http://host.docker.internal:8088/services/collector"
+    source: "crash-simulator"
+    sourcetype: "_json"
+    index: "main"
 
 service:
   telemetry:
@@ -29,10 +21,10 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp_grpc/openobserve]
+      exporters: [splunk_hec]
     metrics:
       receivers: [otlp]
-      exporters: [otlp_grpc/openobserve]
+      exporters: [splunk_hec]
     logs:
       receivers: [otlp]
-      exporters: [otlp_http/openobserve]
+      exporters: [splunk_hec]
