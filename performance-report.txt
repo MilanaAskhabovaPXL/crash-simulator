@@ -1,0 +1,22 @@
+========================================================
+  PERFORMANCE RAPPORT: crash-simulator
+  Datum: Thu May 14 23:33:16 CEST 2026
+========================================================
+
+--- LATENCY VERGELIJKING (ms) ---
+Scenario                  Gem      P50      P95      P99
+--------                  ---      ---      ---      ---
+Baseline                    7        8        9       11
+Met monitoring              7        7        9       13
+Crash scenario             14       14       18       25
+
+--- QUERY LATENCY (ms) ---
+  Prometheus                         11
+  Loki                               12
+  Tempo                              18
+  OpenObserve                        15
+
+--- OVERHEAD ---
+  Monitoring overhead: +?ms (+?%)
+
+========================================================

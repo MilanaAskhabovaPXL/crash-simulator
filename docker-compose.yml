@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  openobserve:
+    image: openobserve/openobserve:latest
+    ports:
+      - "5080:5080"
+      - "5081:5081"
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.com
+      ZO_ROOT_USER_PASSWORD: admin123
+    volumes:
+      - openobserve_data:/data
+
   loki:
     image: grafana/loki:latest
     ports:
@@ -75,6 +86,7 @@ services:
       - otel-collector
 
 volumes:
+  openobserve_data:
   loki_data:
   tempo_data:
   prometheus_data:

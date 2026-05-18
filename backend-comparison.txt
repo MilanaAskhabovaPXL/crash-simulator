@@ -1,0 +1,10 @@
+Prometheus___up_query=5
+Prometheus___rate_query=5
+Loki___labels=8
+Loki___log_query=14
+Tempo___search=10
+GRAFANA_TESTED=1
+OpenObserve___streams_list=6
+OpenObserve___logs_search=6
+OpenObserve___traces_search=6
+OPENOBSERVE_TESTED=1
